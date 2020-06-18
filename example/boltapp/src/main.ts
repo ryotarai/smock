@@ -22,6 +22,7 @@ app.command("/echo", async ({ack, command, respond}: bolt.SlackCommandMiddleware
 });
 
 app.message(':wave:', async ({ message, say }) => {
+  console.log(message);
   await say(`Hello, <@${message.user}>`);
 });
 
