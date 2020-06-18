@@ -3,6 +3,8 @@ package command
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ryotarai/smock/pkg/cli"
@@ -12,12 +14,13 @@ import (
 )
 
 const (
-	flagListen      = "listen"
-	flagServerLog   = "server-log"
-	flagEventURL    = "event-url"
-	flagExternalURL = "external-url"
-	flagUserID      = "user-id"
-	flagUserName    = "user-name"
+	flagListen        = "listen"
+	flagServerLog     = "server-log"
+	flagEventURL      = "event-url"
+	flagExternalURL   = "external-url"
+	flagUserID        = "user-id"
+	flagUserName      = "user-name"
+	flagSigningSecret = "signing-secret"
 )
 
 type Command struct {
@@ -27,7 +30,12 @@ func New() *Command {
 	return &Command{}
 }
 
-func (c *Command) App() *urfavecli.App {
+func (c *Command) App() (*urfavecli.App, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
 	return &urfavecli.App{
 		Commands: []*urfavecli.Command{
 			{
@@ -63,10 +71,17 @@ func (c *Command) App() *urfavecli.App {
 						Usage: "user name",
 						Value: "USERNAME",
 					},
+					&urfavecli.StringFlag{
+						Name:     flagSigningSecret,
+						Usage:    "secret to sign requests",
+						Value:    "dummy",
+						FilePath: filepath.Join(homeDir, ".smock", "signing-secret"),
+						EnvVars:  []string{"SMOCK_SIGNING_SECRET"},
+					},
 				},
 			},
 		},
-	}
+	}, nil
 }
 
 func (c *Command) actionStart(ctx *urfavecli.Context) error {
@@ -76,6 +91,7 @@ func (c *Command) actionStart(ctx *urfavecli.Context) error {
 	client.ExternalURL = ctx.String(flagExternalURL)
 	client.UserName = ctx.String(flagUserName)
 	client.UserID = ctx.String(flagUserID)
+	client.SigningSecret = strings.TrimSpace(ctx.String(flagSigningSecret))
 
 	// Setup interface
 	cli := cli.New()

@@ -17,10 +17,11 @@ import (
 )
 
 type Client struct {
-	EventURL    string
-	ExternalURL string
-	UserName string
-	UserID string
+	EventURL      string
+	ExternalURL   string
+	UserName      string
+	UserID        string
+	SigningSecret string
 }
 
 func New() *Client {
@@ -51,7 +52,7 @@ func (c *Client) SendCommand(command, text string) (*slack.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = signRequest(req)
+	err = c.signRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +129,7 @@ func (c *Client) SendMessage(text string) error {
 	if err != nil {
 		return err
 	}
-	err = signRequest(req)
+	err = c.signRequest(req)
 	if err != nil {
 		return err
 	}
@@ -147,7 +148,7 @@ func (c *Client) SendMessage(text string) error {
 	return nil
 }
 
-func signRequest(req *http.Request) error {
+func (c *Client) signRequest(req *http.Request) error {
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return err
@@ -155,7 +156,7 @@ func signRequest(req *http.Request) error {
 	req.Body = ioutil.NopCloser(bytes.NewReader(body))
 
 	ts := time.Now().Unix()
-	signature, err := calcSignature(ts, string(body))
+	signature, err := c.calcSignature(ts, string(body))
 	if err != nil {
 		return err
 	}
@@ -166,9 +167,9 @@ func signRequest(req *http.Request) error {
 	return nil
 }
 
-func calcSignature(ts int64, requestBody string) (string, error) {
+func (c *Client) calcSignature(ts int64, requestBody string) (string, error) {
 	base := fmt.Sprintf("v0:%d:%s", ts, requestBody)
-	mac := hmac.New(sha256.New, []byte("dummy"))
+	mac := hmac.New(sha256.New, []byte(c.SigningSecret))
 	_, err := fmt.Fprint(mac, base)
 	if err != nil {
 		return "", err
