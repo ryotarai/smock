@@ -85,6 +85,6 @@ func (c *CLI) _execute(input string) error {
 
 func (c *CLI) OnMessage(msg *slack.Msg) {
 	if msg.Text != "" {
-		fmt.Print(Yellow(fmt.Sprintf("<<< %s\n", msg.Text)))
+		fmt.Printf("\033[2K\033[1000D%s %s\n", Yellow("<<<"), msg.Text)
 	}
 }
