@@ -45,7 +45,7 @@ func (c *Client) SendCommand(command, text string) (*slack.Msg, error) {
 	form.Set("channel_id", "CHANNELID")
 	body := form.Encode()
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 3)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "POST", c.EventURL, strings.NewReader(body))
@@ -56,6 +56,7 @@ func (c *Client) SendCommand(command, text string) (*slack.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -161,7 +162,6 @@ func (c *Client) signRequest(req *http.Request) error {
 		return err
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("X-Slack-Request-Timestamp", strconv.FormatInt(ts, 10))
 	req.Header.Set("X-Slack-Signature", signature)
 	return nil
