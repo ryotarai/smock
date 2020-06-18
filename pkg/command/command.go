@@ -16,6 +16,8 @@ const (
 	flagServerLog   = "server-log"
 	flagEventURL    = "event-url"
 	flagExternalURL = "external-url"
+	flagUserID      = "user-id"
+	flagUserName    = "user-name"
 )
 
 type Command struct {
@@ -51,6 +53,16 @@ func (c *Command) App() *urfavecli.App {
 						Usage:    "external URL",
 						Required: true,
 					},
+					&urfavecli.StringFlag{
+						Name:  flagUserID,
+						Usage: "user ID",
+						Value: "USERID",
+					},
+					&urfavecli.StringFlag{
+						Name:  flagUserName,
+						Usage: "user name",
+						Value: "USERNAME",
+					},
 				},
 			},
 		},
@@ -62,6 +74,8 @@ func (c *Command) actionStart(ctx *urfavecli.Context) error {
 	client := client.New()
 	client.EventURL = ctx.String(flagEventURL)
 	client.ExternalURL = ctx.String(flagExternalURL)
+	client.UserName = ctx.String(flagUserName)
+	client.UserID = ctx.String(flagUserID)
 
 	// Setup interface
 	cli := cli.New()

@@ -40,8 +40,8 @@ func (s *Server) handleAuthTest(c *gin.Context) {
 		BotID: "BOTID",
 		AuthTestResponse: slack.AuthTestResponse{
 			URL:    "",
-			Team:   "smock",
-			User:   "bot",
+			Team:   "TEAM",
+			User:   "BOTUSER",
 			TeamID: "TEAMID",
 			UserID: "BOTUSERID",
 		},

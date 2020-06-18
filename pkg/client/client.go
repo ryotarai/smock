@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/json"
@@ -18,6 +19,8 @@ import (
 type Client struct {
 	EventURL    string
 	ExternalURL string
+	UserName string
+	UserID string
 }
 
 func New() *Client {
@@ -35,13 +38,16 @@ func (c *Client) SendCommand(command, text string) (*slack.Msg, error) {
 	form.Set("command", command)
 	form.Set("text", text)
 	form.Set("response_url", responseURL)
-	form.Set("user_id", "USERID")
-	form.Set("user_name", "USERNAME")
+	form.Set("user_id", c.UserID)
+	form.Set("user_name", c.UserName)
 	form.Set("team_id", "TEAMID")
 	form.Set("channel_id", "CHANNELID")
 	body := form.Encode()
 
-	req, err := http.NewRequest("POST", c.EventURL, strings.NewReader(body))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 3)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", c.EventURL, strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +112,7 @@ func (c *Client) SendMessage(text string) error {
 			Type:    "message",
 			Text:    text,
 			Channel: "CHANNELID",
-			User:    "USERID",
+			User:    c.UserID,
 			TS:      strconv.FormatInt(time.Now().UnixNano(), 10),
 		},
 		EventID:   strconv.FormatInt(time.Now().UnixNano(), 10),
