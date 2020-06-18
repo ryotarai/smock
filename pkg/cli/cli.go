@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -74,6 +75,9 @@ func (c *CLI) _execute(input string) error {
 		}
 
 		c.OnMessage(msg)
+	} else if input == "exit" {
+		// TODO: care defer functions
+		os.Exit(0)
 	} else {
 		if err := c.Client.SendMessage(input); err != nil {
 			return err
