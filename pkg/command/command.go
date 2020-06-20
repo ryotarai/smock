@@ -112,7 +112,7 @@ func (c *Command) actionStart(ctx *urfavecli.Context) error {
 	server := server.New()
 	server.CLI = cli
 	go func() {
-		if err := server.Run(":3002"); err != nil {
+		if err := server.Run(ctx.String(flagListen)); err != nil {
 			panic(err)
 		}
 	}()
